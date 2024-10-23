@@ -1,0 +1,6 @@
+@CloudIntro_HostAddress = http://localhost:5277
+
+GET {{CloudIntro_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
