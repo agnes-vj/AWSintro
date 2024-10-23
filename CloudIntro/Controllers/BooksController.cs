@@ -10,6 +10,7 @@ namespace CloudIntro.Controllers
         {
             _bookService = bookService;
         }
+        [HttpGet("/books")]
         public IActionResult Index()
         {
             return Ok(_bookService.FindBooks());
