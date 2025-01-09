@@ -1,7 +1,9 @@
 using CloudIntro;
 using CloudIntro.Repositories;
 using CloudIntro.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +21,21 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
+builder.Services.AddRateLimiter(options =>
+
+{
+    options.AddFixedWindowLimiter(policyName: "fixed", options =>
+    {
+        options.PermitLimit = 3;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueLimit = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
+
 var app = builder.Build();
+
+app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,5 +1,6 @@
 ﻿using CloudIntro.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CloudIntro.Controllers
 {
@@ -10,6 +11,7 @@ namespace CloudIntro.Controllers
         {
             _bookService = bookService;
         }
+        [EnableRateLimiting("fixed")]
         [HttpGet("/books")]
         public IActionResult Index()
         {
