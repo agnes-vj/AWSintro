@@ -10,31 +10,18 @@ namespace CloudIntro.Controllers
     public class BooksController : Controller
     {
         private readonly IBookService _bookService;
-        private readonly IMemoryCache _catch;
 
-        public BooksController(IBookService bookService, IMemoryCache memoryCatch)
+        public BooksController(IBookService bookService)
         {
             _bookService = bookService;
-            _catch = memoryCatch;
+
         }
 
-        [EnableRateLimiting("fixed")]
+        //[EnableRateLimiting("fixed")]
         [HttpGet("/books")]
-        public IActionResult Index()
-        {
-            string booksCatchKey = "BookList";
-            List<Book> books;
-
-            if (!_catch.TryGetValue(booksCatchKey, out books))
-            {
-                books = _bookService.FindBooks().ToList();
-
-                var catchEntryOptions = new MemoryCacheEntryOptions()
-                                                                .SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
-                _catch.Set(booksCatchKey, books, catchEntryOptions);
-            }
-
-            return Ok(books);
+        public IActionResult GetAllBooks()
+        { 
+            return Ok(_bookService.FindBooks());
         }
 
         [HttpGet("{id}")]

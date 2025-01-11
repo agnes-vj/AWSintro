@@ -1,10 +1,12 @@
 ﻿using CloudIntro.Repositories;
+using Microsoft.Extensions.Caching.Memory;
+using System.Text.RegularExpressions;
 
 namespace CloudIntro.Services
 {
     public interface IBookService
     {
-        public IEnumerable<Book> FindBooks();
+        public List<Book> FindBooks();
         public void AddBook(Book newBook);
         public Book GetBook(int id);
         public void RemoveBook(int id);
@@ -12,13 +14,26 @@ namespace CloudIntro.Services
     public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
-        public BookService(IBookRepository bookRepository)
+        private readonly IMemoryCache _catch;
+        public BookService(IBookRepository bookRepository, IMemoryCache memoryCatch)
         {
             _bookRepository = bookRepository;
+            _catch = memoryCatch;
         }
-        public IEnumerable<Book> FindBooks()
+        public List<Book> FindBooks()
         {
-            return _bookRepository.FindBooks();
+            string booksCatchKey = "BookList";
+            List<Book> books;
+
+            if (!_catch.TryGetValue(booksCatchKey, out books))
+            {
+                books = _bookRepository.FindBooks().ToList();
+
+                var catchEntryOptions = new MemoryCacheEntryOptions()
+                                                                .SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+                _catch.Set(booksCatchKey, books, catchEntryOptions);
+            }
+            return books;
         }
         public Book GetBook(int id)
         {
